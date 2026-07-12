@@ -3,11 +3,16 @@ Rails.application.routes.draw do
   get "post_images/index"
   get "post_images/show"
   # ユーザー登録（サインアップ）のためのルーティングを追加
-  resources :users, only: [:new, :create, :show, :edit] , path_names: { new: 'sign_up' }
+  resources :users, only: [:new, :create, :show, :edit, :update] , path_names: { new: 'sign_up' }
  
   resource :session
   resources :passwords, param: :token
-  resources :post_images, only: [:new, :create, :index, :show, :destroy]
+
+  resources :post_images, only: [:new, :create, :index, :show, :destroy] do
+    resource :favorite, only: [:create, :destroy]
+    resources :post_comments, only: [:create, :destroy]
+  end
+  
   root to: "homes#top"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   
