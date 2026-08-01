@@ -1,25 +1,32 @@
 module Authentication
   extend ActiveSupport::Concern
 
-  included do
-    before_action :require_authentication
-    helper_method :authenticated?
-  end
-
-  class_methods do
-    def allow_unauthenticated_access(**options)
-      skip_before_action :require_authentication, **options
+    included do
+      before_action :require_authentication
+      helper_method :authenticated?
+      helper_method :current_user
     end
-  end
 
-  private
+    class_methods do
+      def allow_unauthenticated_access(**options)
+        skip_before_action :require_authentication, **options
+      end
+    end
+
+    private
+
+    def current_user
+      Current.user
+    end
+
     def authenticated?
-      resume_session
+      Current.user.present?
     end
 
     def require_authentication
       resume_session || request_authentication
     end
+
 
     def resume_session
       Current.session ||= find_session_by_cookie

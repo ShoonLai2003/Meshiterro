@@ -1,23 +1,27 @@
 Rails.application.routes.draw do
-  get "post_images/new"
-  get "post_images/index"
-  get "post_images/show"
-  # ユーザー登録（サインアップ）のためのルーティングを追加
-  resources :users, only: [:new, :create, :show, :edit, :update] , path_names: { new: 'sign_up' }
- 
-  resource :session
+# 管理者用
+namespace :admin do
+  resource :session, only: [:new, :create, :destroy]
+  get 'dashboards', to: 'dashboards#index'
+  resources :users, only: [:destroy]
+end
+
+# エンドユーザー用（public名前空間）
+scope module: :public do
+  resource :session, only: [:new, :create, :destroy]
   resources :passwords, param: :token
+  get "sign_up", to: "users#new"
+
+  root to: 'homes#top'
+  get 'homes/about', to: 'homes#about', as: :about
 
   resources :post_images, only: [:new, :create, :index, :show, :destroy] do
-    resource :favorite, only: [:create, :destroy]
+    resource :favorites, only: [:create, :destroy]
     resources :post_comments, only: [:create, :destroy]
   end
-  
-  root to: "homes#top"
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-  
-  # aboutページ
-  get "homes/about", to: "homes#about", as: "about"
+
+  resources :users, only: [:show, :edit, :update]
+end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
